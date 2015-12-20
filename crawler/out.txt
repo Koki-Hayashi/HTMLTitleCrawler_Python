@@ -1,0 +1,9 @@
+http://www.yahoo.co.jp/	2	0	0	0	0	1	0	1	0	2	0
+http://shopping.yahoo.co.jp/?sc_e=ytc	0	0	0	0	0	1	0	1	1	2	0
+http://www.m0mentum.co.jp/	0	1	1	1	1	0	0	0	0	1	0
+http://www.m0mentum.co.jp/	0	1	1	1	1	0	0	0	0	1	0
+http://www.m0mentum.co.jp/service/blackswan.html	0	0	0	0	0	0	0	0	0	0	0
+http://www.m0mentum.co.jp/news.html	0	0	0	0	0	0	0	0	0	0	0
+http://example.com/notfound.html	0	0	0	0	0	0	0	0	0	0	0
+http://example.com/notasdfsadf	0	0	0	0	0	0	0	0	0	0	0
+http://cdn.qiita.com/assets/siteid-reverse-9b38e297bbd020380feed99b444c6202.png	0	0	0	0	0	0	0	0	0	0	0
