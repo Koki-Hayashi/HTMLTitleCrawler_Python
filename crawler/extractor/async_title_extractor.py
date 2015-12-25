@@ -1,43 +1,61 @@
 # -*- coding: utf-8 -*-
 import threading
-import downloader
-import os
+import time
+import re
+from async_downloader import AsyncDownloader
+from operator import itemgetter
 
-class AsyncTitleExtractor(threading.Thread):
+class AsyncTitleExtractor:
 
   def __init__(self, url_list):
-    threading.Thread.__init__(self)
     self.url_title_list = []
     self.url_list = url_list
+    self.lock = threading.Lock()
 
-  # append pairs of url and contents of title tag of html files to url_title_list
-  # when it is not a html file or in case a html has no title tag, append a pair of url and empty string
-  def run(self):
-    for url in self.url_list:
-      path, ext = os.path.splitext(url)
-      if ext and (ext != u".html" or ext != u".htm"):
-        self.url_title_list.append((url, u""))
-        continue
+  def extract_title(self, html):
+    if html is None:
+      return None
 
-      html = downloader.download(url)
+    pattern = r"<title>(.*)</title>"
 
-      title_tag_start = u"<title>"
-      title_tag_end = u"</title>"
+    title = u""
+    for line in html:
+      matchOB = re.search(pattern , line)
 
-      title = ""
-      for line in html:
+      if matchOB:
         line = line.decode(u"utf-8")
-        if title_tag_start and title_tag_end in line:
-          title = line.replace(title_tag_start, "").replace(title_tag_end, "").strip()
+        title = line.replace(u"<title>", "").replace(u"</title>", u"").strip()
+        break
+
+    return title
+
+  def process(self):
+    download_result_list =  []
+    index = 0
+
+    # download contents one by one from url and extract title tagged words asynchronously
+    # result will be wrapped in DownloadResult object and appended into download_result_list
+    for url in self.url_list:
+      downloader = AsyncDownloader(index, url, download_result_list, self.extract_title)
+      downloader.start()
+      index += 1
+
+    while len(download_result_list) != len(self.url_list): # wait until async download finishes
+      time.sleep(1)
+      continue
+
+    download_result_list.sort() # sort by DonloadResult.index
+
+    url_title_list = []
+    for result in download_result_list:
+      url_title_list.append([result.url, result.extracted_content])
+
+    return url_title_list;
 
 
-      self.url_title_list.append((url, title))
 
-  def pop_url_title(self):
-    try:
-      return self.url_title_list.pop(0)
-    except IndexError:
-      return []
+
+
 
 
 

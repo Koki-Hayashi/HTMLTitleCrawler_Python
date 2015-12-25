@@ -27,34 +27,31 @@ def main(word_list_file, url_list_file, output_file):
     sys.stderr.write(u"validation error")
     exit(1)
 
+  word_list = gen_word_list(word_list_file)
 
-  # read url list and start crawling asynchronously before processing further steps
-  # since it's time consuming part
+  # read url list and start crawling asynchronously and extract title tag content
   url_list = gen_url_list(url_list_file)
   print u"crawling start"
   extractor = AsyncTitleExtractor(url_list);
-  extractor.start() # AsyncTitleExtractor.run() download files in listed in url_list
+  url_title_list = extractor.process() # AsyncTitleExtractor.process() download files in listed in url_list
                                 # and store pairs of contents of title tags and urls
-
-  word_list = gen_word_list(word_list_file)
 
   result_list = []
   print u"counting..."
-  while(True):
-    url_title = extractor.pop_url_title()
-    if not extractor.isAlive() and not url_title:
-      break
-
-    if not url_title :  # empty means extractor hasn't processed yet for a targetted url
-      time.sleep(1)
-      continue
+  for url_title in url_title_list:
 
     url = url_title[0]
     title = url_title[1]
 
     # store appearance count of each word
-    count_list = [0] * len(word_list)
-    for i in range(0, len(word_list)):
+    word_list_len = len(word_list)
+    count_list = [0] * word_list_len
+    if title is None: # when title is not extracted then set 0s
+      result = Result(url, count_list)
+      result_list.append(result)
+      continue
+
+    for i in range(0, word_list_len):
       count_list[i] = title.count(word_list[i])
 
     result = Result(url, count_list)
